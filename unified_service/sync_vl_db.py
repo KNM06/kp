@@ -15,7 +15,10 @@ def clear_vl_table():
         conn.close()
 
 def sync():
-    excel_path = r"D:\БГУИР\OSTIS\ostis-ann\problem-solver\py\unified_service\database\tables\VL_models.xlsx"
+    # Получаем абсолютный путь к папке, где лежит этот скрипт
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    # Собираем относительный путь до файла
+    excel_path = os.path.join(base_dir, "database", "tables", "VL_models.xlsx")
     
     try:
         clear_vl_table()

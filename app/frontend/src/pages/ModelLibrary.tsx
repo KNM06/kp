@@ -9,6 +9,7 @@ import { Search, Filter, ArrowDownAZ, ArrowUpAZ, SlidersHorizontal, X, Info, Che
 import { useModels } from '@/hooks/useModels';
 import { Loader2 } from 'lucide-react';
 
+// Шаблон со всеми ключами, чтобы React никогда не получал undefined
 const DEFAULT_FILTERS = {
   license: [], country: [], developer: [], date: [], 
   mteb: [], dimension: [], context: [],
@@ -16,6 +17,20 @@ const DEFAULT_FILTERS = {
   ned: [], teds: [], topWorld: [],
   // НОВЫЕ ФИЛЬТРЫ ДЛЯ VL
   visionEncoder: [], specialization: []
+};
+
+// Функция нормализации архитектуры (вынесена за пределы компонента для чистоты)
+const normalizeArchitecture = (arch: any, type?: string) => {
+  const str = String(arch || '').trim();
+  if (!str || str === 'N/A' || str === '—' || str === '-') return 'unknown';
+
+  // Упрощаем только для LLM и VL
+  if (type === 'LLM' || type === 'VL') {
+    const lower = str.toLowerCase();
+    if (lower.includes('плотная') || lower.includes('dense')) return 'Плотная архитектура';
+    if (lower.includes('разреженная') || lower.includes('moe')) return 'Разреженная архитектура';
+  }
+  return str; // Для остальных возвращаем как есть (например, OCR)
 };
 
 const ModelLibrary = () => {
@@ -103,15 +118,24 @@ const ModelLibrary = () => {
 
   const uniqueDevelopers = getExactValues('family');
   const uniqueCountries = getExactValues('country');
-  const uniqueArchitectures = getExactValues('architecture');
   const uniqueContexts = getExactValues('contextWindow');
   const uniqueHardware = getExactValues('hardwareRequirements');
   const uniqueParameters = getExactValues('parameterCount');
   const uniqueMteb = getExactValues('mtebScore');
   const uniqueNed = getExactValues('ned');
   const uniqueTeds = getExactValues('teds');
-  const uniqueVisionEncoders = getExactValues('visionEncoder'); // НОВОЕ ДЛЯ VL
-  const uniqueSpecializations = getExactValues('applicationSpecifics'); // НОВОЕ ДЛЯ VL
+  const uniqueVisionEncoders = getExactValues('visionEncoder');
+  const uniqueSpecializations = getExactValues('applicationSpecifics');
+
+  // НОВОЕ: Собираем уникальные архитектуры через нормализатор
+  const uniqueArchitectures = useMemo(() => {
+    const s = new Set<string>();
+    typeFilteredModels.forEach(m => {
+      const val = normalizeArchitecture(m.architecture, m.type);
+      if (val !== 'unknown') s.add(val);
+    });
+    return Array.from(s).sort();
+  }, [typeFilteredModels]);
 
   const uniqueLicenses = useMemo(() => {
     const s = new Set<string>();
@@ -176,7 +200,8 @@ const ModelLibrary = () => {
       const match = String(m.releaseDate || '').match(/\d{4}/);
       return match ? match[0] : 'unknown';
     },
-    architecture: (m) => String(m.architecture || '').trim(),
+    // ИСПРАВЛЕНО: Парсер архитектуры теперь использует нормализатор
+    architecture: (m) => normalizeArchitecture(m.architecture, m.type),
     context: (m) => String(m.contextWindow || '').trim(),
     multilingual: (m) => String(m.multilingual || m.languages || '').trim(),
     hardware: (m) => String(m.hardwareRequirements || '').trim(),
@@ -190,8 +215,8 @@ const ModelLibrary = () => {
     topWorld: (m) => String(m.rating || '').trim(),
     ned: (m) => String(m.ned || '').trim(),
     teds: (m) => String(m.teds || '').trim(),
-    visionEncoder: (m) => String(m.visionEncoder || '').trim(), // НОВОЕ ДЛЯ VL
-    specialization: (m) => String(m.applicationSpecifics || '').trim() // НОВОЕ ДЛЯ VL
+    visionEncoder: (m) => String(m.visionEncoder || '').trim(),
+    specialization: (m) => String(m.applicationSpecifics || '').trim()
   };
 
   // --- КОНФИГУРАЦИЯ ФИЛЬТРОВ ---
@@ -369,7 +394,6 @@ const ModelLibrary = () => {
                   <SelectItem value="Embedding">Embedding</SelectItem>
                   <SelectItem value="LLM">LLM</SelectItem>
                   <SelectItem value="OCR">OCR</SelectItem>
-                  {/* ИСПРАВЛЕНО: Добавлен VL */}
                   <SelectItem value="VL">VL</SelectItem>
                 </SelectContent>
               </Select>

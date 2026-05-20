@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 from database.db_utils import upsert_llm_model, get_db_connection
 
 def clear_llm_table():
@@ -13,8 +14,11 @@ def clear_llm_table():
         conn.close()
 
 def sync_excel_to_db():
-    # Укажи тут свой путь к Excel файлу LLM
-    excel_path = r"D:\БГУИР\OSTIS\ostis-ann\problem-solver\py\unified_service\database\tables\LLM.xlsx"
+    # Получаем абсолютный путь к папке, где лежит этот скрипт (unified_service)
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    # Собираем относительный путь до файла внутри проекта
+    excel_path = os.path.join(base_dir, "database", "tables", "LLM.xlsx")
+    
     print(f"Reading data from {excel_path}...")
 
     try:

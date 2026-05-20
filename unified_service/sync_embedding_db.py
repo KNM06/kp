@@ -1,9 +1,7 @@
 import openpyxl
 import re
+import os  # <--- Добавили импорт os
 from database import upsert_embedding_model, get_db_connection
-
-# Укажи точный путь к своему Excel-файлу
-EXCEL_FILE_NAME = r'D:\БГУИР\OSTIS\ostis-ann\problem-solver\py\unified_service\database\tables\Сравнение Embedding-моделей для RAG.xlsx'
 
 def clear_embedding_table():
     """Полная очистка таблицы перед синхронизацией"""
@@ -22,13 +20,18 @@ def clean_val(val):
     return str(val).strip() if val is not None else ""
 
 def sync_excel_to_db():
-    print(f"Reading data from {EXCEL_FILE_NAME}...")
+    # Получаем абсолютный путь к папке скрипта
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    # Собираем путь до файла
+    excel_path = os.path.join(base_dir, "database", "tables", "Сравнение Embedding-моделей для RAG.xlsx")
+    
+    print(f"Reading data from {excel_path}...")
     try:
         # 1. Очищаем старые данные
         clear_embedding_table()
 
         # 2. Открываем Excel
-        wb = openpyxl.load_workbook(EXCEL_FILE_NAME, data_only=True)
+        wb = openpyxl.load_workbook(excel_path, data_only=True)
         ws = wb.active
 
         current_country = ""

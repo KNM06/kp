@@ -13,8 +13,12 @@ def clear_ocr_table():
         conn.close()
 
 def sync_ocr_to_db():
-    # Укажи тут свой путь к Excel файлу OCR
-    excel_path = r"D:\БГУИР\OSTIS\ostis-ann\problem-solver\py\unified_service\database\tables\OCR.xlsx"
+    # Получаем абсолютный путь к папке, где лежит этот скрипт
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    # Собираем относительный путь до файла
+    excel_path = os.path.join(base_dir, "database", "tables", "OCR.xlsx")
+
+    print(f"Reading data from {excel_path}...")
 
     try:
         clear_ocr_table()
