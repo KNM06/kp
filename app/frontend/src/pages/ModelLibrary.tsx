@@ -15,7 +15,6 @@ const DEFAULT_FILTERS = {
   mteb: [], dimension: [], context: [],
   elo: [], parameters: [], architecture: [], hardware: [], multilingual: [],
   ned: [], teds: [], topWorld: [],
-  // НОВЫЕ ФИЛЬТРЫ ДЛЯ VL
   visionEncoder: [], specialization: []
 };
 
@@ -24,13 +23,12 @@ const normalizeArchitecture = (arch: any, type?: string) => {
   const str = String(arch || '').trim();
   if (!str || str === 'N/A' || str === '—' || str === '-') return 'unknown';
 
-  // Упрощаем только для LLM и VL
   if (type === 'LLM' || type === 'VL') {
     const lower = str.toLowerCase();
     if (lower.includes('плотная') || lower.includes('dense')) return 'Плотная архитектура';
     if (lower.includes('разреженная') || lower.includes('moe')) return 'Разреженная архитектура';
   }
-  return str; // Для остальных возвращаем как есть (например, OCR)
+  return str;
 };
 
 const ModelLibrary = () => {
@@ -61,7 +59,6 @@ const ModelLibrary = () => {
     localStorage.setItem('lib_advanced', JSON.stringify(advancedFilters));
   }, [searchTerm, sortBy, filterType, expandedFilters, advancedFilters]);
 
-  // --- УТИЛИТЫ ---
   const extractNumbersList = (val: any): number[] => {
     if (!val) return [];
     const matches = String(val).match(/\d+(\.\d+)?/g);
@@ -93,7 +90,7 @@ const ModelLibrary = () => {
     return match ? parseInt(match[1]) : Infinity;
   };
 
-  // --- ДИНАМИЧЕСКОЕ ИЗВЛЕЧЕНИЕ ДАННЫХ ---
+  // Динамическое извлечение данных
   const typeFilteredModels = useMemo(() => {
     return sampleModels.filter(m => filterType === 'all' || (m.type || 'Embedding') === filterType);
   }, [sampleModels, filterType]);
@@ -127,7 +124,7 @@ const ModelLibrary = () => {
   const uniqueVisionEncoders = getExactValues('visionEncoder');
   const uniqueSpecializations = getExactValues('applicationSpecifics');
 
-  // НОВОЕ: Собираем уникальные архитектуры через нормализатор
+  // Собираем уникальные архитектуры через нормализатор
   const uniqueArchitectures = useMemo(() => {
     const s = new Set<string>();
     typeFilteredModels.forEach(m => {
@@ -191,7 +188,7 @@ const ModelLibrary = () => {
     return Array.from(s).sort((a,b) => Number(a) - Number(b));
   }, [typeFilteredModels]);
 
-  // --- ПАРСЕРЫ ---
+  // Парсеры
   const parsers: Record<string, (m: any) => string | string[]> = {
     license: (m) => mapLicense(m.license) || 'unknown',
     country: (m) => String(m.country || '').trim(),
@@ -200,7 +197,6 @@ const ModelLibrary = () => {
       const match = String(m.releaseDate || '').match(/\d{4}/);
       return match ? match[0] : 'unknown';
     },
-    // ИСПРАВЛЕНО: Парсер архитектуры теперь использует нормализатор
     architecture: (m) => normalizeArchitecture(m.architecture, m.type),
     context: (m) => String(m.contextWindow || '').trim(),
     multilingual: (m) => String(m.multilingual || m.languages || '').trim(),
@@ -219,7 +215,7 @@ const ModelLibrary = () => {
     specialization: (m) => String(m.applicationSpecifics || '').trim()
   };
 
-  // --- КОНФИГУРАЦИЯ ФИЛЬТРОВ ---
+  // Конфигурация фильтров
   const allFiltersConfig = useMemo(() => [
     { id: 'developer', types: ['all', 'Embedding', 'LLM', 'OCR', 'VL'], title: 'Разработчик / Команда', options: uniqueDevelopers.map(v => ({val: v, label: v})) },
     { id: 'country', types: ['all', 'Embedding', 'LLM', 'OCR', 'VL'], title: 'Страна производства', options: uniqueCountries.map(v => ({val: v, label: v})) },
@@ -241,7 +237,6 @@ const ModelLibrary = () => {
     { id: 'ned', types: ['OCR'], title: 'NED (Ниже = Лучше)', options: uniqueNed.map(v => ({val: v, label: v})) },
     { id: 'teds', types: ['OCR'], title: 'TEDS (Выше = Лучше)', options: uniqueTeds.map(v => ({val: v, label: v})) },
 
-    // НОВЫЕ ФИЛЬТРЫ ДЛЯ VL
     { id: 'visionEncoder', types: ['VL'], title: 'Визуальный энкодер', options: uniqueVisionEncoders.map(v => ({val: v, label: v})) },
     { id: 'specialization', types: ['VL'], title: 'Специфика применения', options: uniqueSpecializations.map(v => ({val: v, label: v})) }
 
@@ -252,7 +247,7 @@ const ModelLibrary = () => {
     return allFiltersConfig.filter(cat => cat.types.includes(filterType));
   }, [allFiltersConfig, filterType]);
 
-  // --- ЛОГИКА ФИЛЬТРАЦИИ ---
+  // Логика фильтрации
   const modelMatchesFilters = (model: any, filtersObj: Record<string, string[]>, skipCategory: string | null = null) => {
     for (const key of Object.keys(filtersObj)) {
       if (key === skipCategory) continue; 

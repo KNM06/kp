@@ -12,7 +12,6 @@ export const useModel = (id: string | undefined) => {
     const fetchModel = async () => {
       try {
         setIsLoading(true);
-        // Замени URL на тот (относительный или абсолютный), который сработал у тебя в прошлый раз!
         const response = await fetch(`http://localhost:8000/api/knowledge/models/${id}`);
         
         if (!response.ok) {

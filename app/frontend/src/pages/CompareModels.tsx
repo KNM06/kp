@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { X, Trophy, PlusCircle, Trash2 } from 'lucide-react';
 import { NeuralModel } from '@/types/neural';
 
-// --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
+// Вспомогательные функции
 const parseNum = (val: any): number => {
   const str = String(val || '').toLowerCase().replace(/\s/g, '');
   if (!val || str === '-' || str === 'н/д' || str === '—' || /^(n\/a)+$/.test(str) || str === 'nan') return -1;
@@ -65,7 +65,7 @@ const formatReleaseDate = (dateStr: string | undefined) => {
   return clean;
 };
 
-// --- КОНФИГУРАЦИИ СТРОК ДЛЯ КАЖДОГО ТИПА ---
+// Конфигурация строк для каждого типа
 const LLM_ROWS = [
   { id: 'family', label: 'Разработчик', rule: 'none' },
   { id: 'country', label: 'Страна', rule: 'none' },
@@ -162,9 +162,8 @@ const ModelComparison = () => {
     { type: 'VL', title: 'Vision-Language модели (VL)', models: vlModels, rows: VL_ROWS }, 
   ].filter(g => g.models.length > 0);
 
-  // Функция для отрисовки отдельной таблицы (группы)
+  // Функция для отрисовки отдельной таблицы
   const renderTable = (group: typeof groups[0]) => {
-    // 1. Вычисляем "Лучшие" значения для текущей группы
     const bests: Record<string, number> = {};
     let bestWorld = Infinity;
     let bestRU = Infinity;
@@ -199,7 +198,6 @@ const ModelComparison = () => {
       }
     });
 
-    // 2. Отрисовка конкретной ячейки
     const renderCell = (model: NeuralModel, row: typeof group.rows[0]) => {
       const rawValue = model[row.id as keyof NeuralModel];
       const valStr = cleanFormat(rawValue);
@@ -213,7 +211,7 @@ const ModelComparison = () => {
         );
       }
 
-      // Проверка на "Лучший" результат (зеленый цвет)
+      // Проверка на "Лучший" результат
       let isBest = false;
       if (group.models.length > 1) { 
         if (row.rule === 'lowest-rank') {

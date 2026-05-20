@@ -14,9 +14,7 @@ def clear_llm_table():
         conn.close()
 
 def sync_excel_to_db():
-    # Получаем абсолютный путь к папке, где лежит этот скрипт (unified_service)
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    # Собираем относительный путь до файла внутри проекта
     excel_path = os.path.join(base_dir, "database", "tables", "LLM.xlsx")
     
     print(f"Reading data from {excel_path}...")
@@ -30,20 +28,20 @@ def sync_excel_to_db():
             model_data = {
                 "id": str(row["Модель"]).lower().replace(" ", "-").replace(".", "-"),
                 "name": str(row["Модель"]),
-                "type": "LLM",                           # Устанавливаем строгий тип
-                "family": family_name,                   # Унифицировано (было developer)
+                "type": "LLM",                          
+                "family": family_name,                  
                 "country": str(row["Страна"]),
                 "releaseDate": str(row["Дата выхода"]),
-                "parameterCount": str(row["Размер (всего / активные)"]), # Унифицировано
+                "parameterCount": str(row["Размер (всего / активные)"]), 
                 "architecture": str(row["Архитектура"]),
-                "contextWindow": str(row["Контекст"]),   # Унифицировано
-                "rating": str(row["LMArena Elo"]),       # Унифицировано (было elo)
-                "multilingual": str(row["Языки"]),       # Унифицировано
-                "description": str(row["Специализация"]),# Унифицировано
-                "hardwareRequirements": str(row["Аппаратные требования"]), # Унифицировано
+                "contextWindow": str(row["Контекст"]),  
+                "rating": str(row["LMArena Elo"]),    
+                "multilingual": str(row["Языки"]),  
+                "description": str(row["Специализация"]),
+                "hardwareRequirements": str(row["Аппаратные требования"]),
                 "benchmarks": str(row["Основные бенчмарки"]),
                 "license": str(row["Лицензия"]),
-                "link": str(row["Источник"]),            # Унифицировано (было sourceUrl)
+                "link": str(row["Источник"]),  
                 "tags": f"LLM,{family_name}",
                 "downloads": 1000,
                 "stars": 0

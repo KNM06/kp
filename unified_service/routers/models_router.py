@@ -4,7 +4,7 @@ from database.db_utils import (
     get_all_embedding_models, 
     get_all_llm_models, 
     get_all_ocr_models,
-    get_all_vl_models  # <--- Добавили это
+    get_all_vl_models
 )
 
 logger = logging.getLogger(__name__)
@@ -17,9 +17,8 @@ def read_all_models():
         embeddings = get_all_embedding_models()
         llms = get_all_llm_models()
         ocrs = get_all_ocr_models()
-        vls = get_all_vl_models() # <--- Запрашиваем VL
+        vls = get_all_vl_models()
 
-        # Склеиваем ЧЕТЫРЕ списка в один
         all_models = embeddings + llms + ocrs + vls 
 
         for model in all_models:
@@ -37,7 +36,7 @@ def read_model_by_id(model_id: str):
         embeddings = get_all_embedding_models()
         llms = get_all_llm_models()
         ocrs = get_all_ocr_models()
-        vls = get_all_vl_models() # <--- Запрашиваем VL
+        vls = get_all_vl_models() 
         
         all_models = embeddings + llms + ocrs + vls 
 

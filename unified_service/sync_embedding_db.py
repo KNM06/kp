@@ -1,7 +1,7 @@
 import openpyxl
-import re
-import os  # <--- Добавили импорт os
+import os
 from database import upsert_embedding_model, get_db_connection
+
 
 def clear_embedding_table():
     """Полная очистка таблицы перед синхронизацией"""
@@ -15,22 +15,22 @@ def clear_embedding_table():
     finally:
         conn.close()
 
+
 def clean_val(val):
     """Помощник для очистки значений из ячеек Excel"""
     return str(val).strip() if val is not None else ""
 
+
 def sync_excel_to_db():
-    # Получаем абсолютный путь к папке скрипта
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    # Собираем путь до файла
-    excel_path = os.path.join(base_dir, "database", "tables", "Сравнение Embedding-моделей для RAG.xlsx")
-    
+    excel_path = os.path.join(
+        base_dir, "database", "tables", "Embedding.xlsx"
+    )
+
     print(f"Reading data from {excel_path}...")
     try:
-        # 1. Очищаем старые данные
         clear_embedding_table()
 
-        # 2. Открываем Excel
         wb = openpyxl.load_workbook(excel_path, data_only=True)
         ws = wb.active
 
@@ -38,18 +38,18 @@ def sync_excel_to_db():
         current_family = ""
         count = 0
 
-        # 3. Читаем строки, начиная со 2-й (пропуская заголовки)
         for row in ws.iter_rows(min_row=2):
             col_country = clean_val(row[0].value)
             col_family = clean_val(row[1].value)
             name = clean_val(row[2].value)
 
-            # Наследуем заголовки для объединенных ячеек
-            if col_country: current_country = col_country
-            if col_family: current_family = col_family
+            if col_country:
+                current_country = col_country
+            if col_family:
+                current_family = col_family
 
             if not name:
-                continue # Пропускаем пустые строки
+                continue
 
             date_str = clean_val(row[3].value)
             mteb_str = clean_val(row[4].value)
@@ -60,7 +60,6 @@ def sync_excel_to_db():
             multilingual = clean_val(row[9].value)
             vram = clean_val(row[10].value)
 
-            # Магия извлечения ссылок
             link_cell = row[11]
             link = ""
             if link_cell.hyperlink and link_cell.hyperlink.target:
@@ -68,15 +67,12 @@ def sync_excel_to_db():
             else:
                 link = clean_val(link_cell.value)
 
-            # Формируем описание
             description = f"Модель {current_family}"
             if rating and rating != "—" and rating != "None":
                 description += f" ({rating})"
 
-            # Генерируем уникальный ID
             model_id = name.lower().replace(" ", "-").replace(".", "-")
 
-            # Формируем словарь для базы данных
             model_data = {
                 "id": model_id,
                 "name": name,
@@ -92,21 +88,23 @@ def sync_excel_to_db():
                 "license": license_,
                 "releaseDate": date_str,
                 "country": current_country,
-                "tags": f"Embedding,{current_family}", # Сохраняем теги через запятую
+                "tags": f"Embedding,{current_family}",
                 "link": link,
                 "downloads": 1000,
-                "stars": 0
+                "stars": 0,
             }
 
-            # 4. Записываем в базу
             upsert_embedding_model(model_data)
             count += 1
             print(f"Добавлена Embedding модель: {name}")
 
-        print(f"\nБаза знаний Embedding успешно синхронизирована! Загружено {count} моделей.")
+        print(
+            f"\nБаза знаний Embedding успешно синхронизирована! Загружено {count} моделей."
+        )
 
     except Exception as e:
         print(f"Ошибка при синхронизации Embedding: {e}")
+
 
 if __name__ == "__main__":
     sync_excel_to_db()

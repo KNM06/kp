@@ -32,7 +32,6 @@ def init_database() -> None:
     logger.info("Initializing unified database...")
     conn = get_db_connection()
     try:
-        # Chat & Session Tables (твои стандартные)
         conn.execute('''CREATE TABLE IF NOT EXISTS chat_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, session_id TEXT NOT NULL, user_query TEXT NOT NULL, agent_response TEXT NOT NULL, category TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
         conn.execute('''CREATE TABLE IF NOT EXISTS document_store (id INTEGER PRIMARY KEY AUTOINCREMENT, filename TEXT NOT NULL, upload_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
         conn.execute('''CREATE TABLE IF NOT EXISTS session_state (session_id TEXT PRIMARY KEY, category TEXT, original_query TEXT, collected_data TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
@@ -47,7 +46,7 @@ def init_database() -> None:
             )
         ''')
 
-        # 2. LLM Knowledge Base (Унифицировано)
+        # 2. LLM Knowledge Base
         conn.execute('''
             CREATE TABLE IF NOT EXISTS llm_knowledge_base (
                 id TEXT PRIMARY KEY, name TEXT NOT NULL, family TEXT, type TEXT, description TEXT,
@@ -57,7 +56,7 @@ def init_database() -> None:
             )
         ''')
 
-        # 3. OCR Knowledge Base (Унифицировано)
+        # 3. OCR Knowledge Base
         conn.execute('''
             CREATE TABLE IF NOT EXISTS ocr_knowledge_base (
                 id TEXT PRIMARY KEY, name TEXT NOT NULL, family TEXT, type TEXT, description TEXT,
@@ -67,7 +66,7 @@ def init_database() -> None:
             )
         ''')
 
-        # 4. VL (Vision-Language) Knowledge Base (НОВОЕ)
+        # 4. VL Knowledge Base
         conn.execute('''
             CREATE TABLE IF NOT EXISTS vl_knowledge_base (
                 id TEXT PRIMARY KEY, name TEXT NOT NULL, family TEXT, type TEXT, description TEXT,
@@ -91,7 +90,6 @@ def init_database() -> None:
     finally:
         conn.close()
 
-# --- CHAT & SESSION METHODS ---
 def insert_chat_log(session_id: str, user_query: str, agent_response: str, category: Optional[str] = None, agent_meta: Optional[Dict[str, Any]] = None) -> None:
     conn = get_db_connection()
     try:
@@ -266,7 +264,7 @@ def delete_old_sessions(hours: int = 24) -> int:
     finally:
         conn.close()
 
-# --- EMBEDDING METHODS ---
+# EMBEDDING
 def get_all_embedding_models() -> List[Dict[str, Any]]:
     conn = get_db_connection()
     try:
@@ -298,7 +296,7 @@ def get_embedding_model_by_id(model_id: str) -> Optional[Dict[str, Any]]:
     finally:
         conn.close()
 
-# --- LLM METHODS ---
+# LLM
 def get_all_llm_models() -> List[Dict[str, Any]]:
     conn = get_db_connection()
     try:
@@ -320,7 +318,7 @@ def upsert_llm_model(model_data: Dict[str, Any]) -> None:
     finally:
         conn.close()
 
-# --- OCR METHODS ---
+# OCR
 def get_all_ocr_models() -> List[Dict[str, Any]]:
     conn = get_db_connection()
     try:
@@ -342,7 +340,7 @@ def upsert_ocr_model(model_data: Dict[str, Any]) -> None:
     finally:
         conn.close()
 
-# --- VL METHODS (НОВОЕ) ---
+# VL
 def get_all_vl_models() -> List[Dict[str, Any]]:
     conn = get_db_connection()
     try:

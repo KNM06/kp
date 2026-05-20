@@ -18,7 +18,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import settings
 from routers import models_router
 from utils import setup_logging
-# ИСПРАВЛЕНО: Добавлены llm_router и embedding_router
 from routers import health_router, documents_router, chat_router, dialogs_router
 
 # Setup logging
@@ -98,7 +97,6 @@ app.include_router(health_router)
 app.include_router(documents_router)
 app.include_router(chat_router)
 app.include_router(dialogs_router)
-# ИСПРАВЛЕНО: Регистрируем новые роутеры
 app.include_router(models_router.router)
 
 logger.info("Routers registered successfully")
